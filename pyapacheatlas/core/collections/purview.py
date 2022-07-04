@@ -251,3 +251,41 @@ class PurviewCollectionsClient(AtlasBaseClient):
         collection_generator = self._list_collections_generator(atlas_endpoint)
 
         return collection_generator
+
+
+
+
+
+
+    #me
+
+    def list_collections_new(
+        self,
+        api_version: str = "2019-11-01-preview",
+        hierarchy: bool = False,
+        only_names: bool = False,
+        skipToken: str = None
+    ):
+
+        """list collectons and a couple things
+        """
+
+        atlas_endpoint = self.endpoint_url + f"collections?api-version={api_version}"
+        if skipToken:
+            atlas_endpoint = atlas_endpoint + f"&$skipToken={skipToken}"
+        
+        collections_list_request = requests.get(
+            url=atlas_endpoint,
+            headers=self.authentication.get_authentication_headers()
+        )
+
+        collections_list = collections_list_request.json()["value"]
+
+        return collections_list
+
+        
+
+
+    
+
+
