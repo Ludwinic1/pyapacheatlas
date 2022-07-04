@@ -334,73 +334,14 @@ class PurviewCollectionsClient(AtlasBaseClient):
 
 
 
-
     def create_collectiions(
         self, 
         collection_to_start_on: str,
         collection_names: list[str] = None,
         api_version: str = "2019-11-01-preview"
     ):
-
         collection_list = self._get_final_collection_names()
-
-        collection_to_start_on = collection_to_start_on.strip()
-        collection_to_start_on_check = []
-        for name, value in collection_list.items():
-            if collection_to_start_on == value["friendlyName"] or collection_to_start_on == name:
-                collection_to_start_on = name 
-                collection_to_start_on_check.append(collection_to_start_on)
         
-        if not collection_to_start_on_check:
-            raise ValueError(f"The collection '{collection_to_start_on}' either doesn't exist or you don\'t have permission to start on it. Would need to be a collection admin on that collection if it exists.")
-
-        for name in collection_names:
-            if "/" in name:
-                split_names = name.split("/")
-                final_names = [name.strip() for name in split_names]
-            else:
-                final_names = [name.strip()]
-            
-
-            updated_final_names = final_names.copy()
-            for index, name in enumerate(final_names):
-                for coll, value in collection_list.items():
-                    if name == value["friendlyName"] and name != coll and ' ' in name:
-                        updated_final_names[index] = value["friendlyName"]
-                    elif name == value["friendlyName"] and name != coll:
-                        updated_final_names[index] = coll
-            
-            print(updated_final_names)
-            for index, name in enumerate(updated_final_names, start=1):
-                if ' ' in name:
-                    friendly_name =  name
-                    name = name.replace(" ", "")
-                else:
-                    friendly_name = name
-                     
-                atlas_endpoint = self.endpoint_url + f"account/collections/{name}?api-version={api_version}"
-                headers=self.authentication.get_authentication_headers()
-                if index == 1:
-                    data = f'{{"parentCollection": {{"referenceName": "{collection_to_start_on}"}}, "friendlyName": "{final_names[index - 1]}"}}'
-                    print(data, index)
-                    request = requests.put(url=atlas_endpoint, headers=headers, data=data)
-                    print(request.content, '\n')
-                else:
-                    data = f'{{"parentCollection": {{"referenceName": "{updated_final_names[index - 2]}"}}, "friendlyName": "{friendly_name}"}}'
-                    print(data, index)
-                    request = requests.put(url=atlas_endpoint, headers=headers, data=data)
-                    print(request.content, '\n')
- 
-
-    def create_collectiions2(
-        self, 
-        collection_to_start_on: str,
-        collection_names: list[str] = None,
-        api_version: str = "2019-11-01-preview"
-    ):
-
-        collection_list = self._get_final_collection_names()
-
         collection_to_start_on = collection_to_start_on.strip()
         collection_to_start_on_check = []
         for name, value in collection_list.items():
@@ -441,7 +382,6 @@ class PurviewCollectionsClient(AtlasBaseClient):
                     else:
                         collection_dict[name] = {"friendlyName": name, "parentCollection": None}
 
-
             collection_updated_list = list(collection_dict.items())
 
             final_collection_updated_list = []
@@ -465,7 +405,61 @@ class PurviewCollectionsClient(AtlasBaseClient):
 
 
 
+#  def create_collectiions(
+#         self, 
+#         collection_to_start_on: str,
+#         collection_names: list[str] = None,
+#         api_version: str = "2019-11-01-preview"
+#     ):
 
+#         collection_list = self._get_final_collection_names()
+
+#         collection_to_start_on = collection_to_start_on.strip()
+#         collection_to_start_on_check = []
+#         for name, value in collection_list.items():
+#             if collection_to_start_on == value["friendlyName"] or collection_to_start_on == name:
+#                 collection_to_start_on = name 
+#                 collection_to_start_on_check.append(collection_to_start_on)
+        
+#         if not collection_to_start_on_check:
+#             raise ValueError(f"The collection '{collection_to_start_on}' either doesn't exist or you don\'t have permission to start on it. Would need to be a collection admin on that collection if it exists.")
+
+#         for name in collection_names:
+#             if "/" in name:
+#                 split_names = name.split("/")
+#                 final_names = [name.strip() for name in split_names]
+#             else:
+#                 final_names = [name.strip()]
+            
+
+#             updated_final_names = final_names.copy()
+#             for index, name in enumerate(final_names):
+#                 for coll, value in collection_list.items():
+#                     if name == value["friendlyName"] and name != coll and ' ' in name:
+#                         updated_final_names[index] = value["friendlyName"]
+#                     elif name == value["friendlyName"] and name != coll:
+#                         updated_final_names[index] = coll
+            
+#             print(updated_final_names)
+#             for index, name in enumerate(updated_final_names, start=1):
+#                 if ' ' in name:
+#                     friendly_name =  name
+#                     name = name.replace(" ", "")
+#                 else:
+#                     friendly_name = name
+                     
+#                 atlas_endpoint = self.endpoint_url + f"account/collections/{name}?api-version={api_version}"
+#                 headers=self.authentication.get_authentication_headers()
+#                 if index == 1:
+#                     data = f'{{"parentCollection": {{"referenceName": "{collection_to_start_on}"}}, "friendlyName": "{final_names[index - 1]}"}}'
+#                     print(data, index)
+#                     request = requests.put(url=atlas_endpoint, headers=headers, data=data)
+#                     print(request.content, '\n')
+#                 else:
+#                     data = f'{{"parentCollection": {{"referenceName": "{updated_final_names[index - 2]}"}}, "friendlyName": "{friendly_name}"}}'
+#                     print(data, index)
+#                     request = requests.put(url=atlas_endpoint, headers=headers, data=data)
+#                     print(request.content, '\n')
 
             # updated_final_names = final_names.copy()
             # for index, name in enumerate(final_names):
