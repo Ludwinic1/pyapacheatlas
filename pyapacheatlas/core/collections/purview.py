@@ -1,3 +1,4 @@
+import enum
 import logging
 from typing import List, Union
 
@@ -5,6 +6,9 @@ from ..entity import AtlasEntity
 from ..util import _handle_response, AtlasBaseClient, batch_dependent_entities
 
 import requests
+
+#me
+from anytree import Node, RenderTree, AsciiStyle
 
 
 class PurviewCollectionsClient(AtlasBaseClient):
@@ -259,6 +263,7 @@ class PurviewCollectionsClient(AtlasBaseClient):
 
     #me
 
+
     def list_collections_new(
         self,
         api_version: str = "2019-11-01-preview",
@@ -274,18 +279,58 @@ class PurviewCollectionsClient(AtlasBaseClient):
         if skipToken:
             atlas_endpoint = atlas_endpoint + f"&$skipToken={skipToken}"
         
-        collections_list_request = requests.get(
+        collection_list_request = requests.get(
             url=atlas_endpoint,
             headers=self.authentication.get_authentication_headers()
         )
+        collection_list = collection_list_request.json()["value"]
+        if hierarchy:
+            self._hierarchy()
 
-        collections_list = collections_list_request.json()["value"]
+        elif only_names:
+            friendly_names_list = [coll["friendlyName"] for coll in collection_list]
+            return friendly_names_list
 
-        return collections_list
+        return collection_list
 
-        
+    def _get_final_collection_names(self):
+        collection_list = self.list_collections_new()
 
+        final_collection_list = {}
+        for index, coll in enumerate(collection_list):
+            if "parentCollection" not in coll:
+                final_collection_list[coll["name"]] = {
+                    "friendlyName": coll["friendlyName"], 
+                    "index": index, 
+                    "parentCollection": None
+                }
+            else:
+                final_collection_list[coll["name"]] = {
+                    "friendlyName": coll["friendlyName"], 
+                    "index": index, 
+                    "parentCollection": coll['parentCollection']['referenceName']
+                }
+        return final_collection_list
 
     
+    def _hierarchy(self):
+        collection_list = self._get_final_collection_names()
+        for index, coll in enumerate(collection_list.items()):
+            real_name = coll[0]
+            friendly_name = coll[1]["friendlyName"]
+            parent_collection = coll[1]["parentCollection"]
+
+            if index == 0:
+                root = Node(name=friendly_name)
+                root_name = real_name 
+            
+            elif index != 0 and parent_collection == root_name:
+                child = Node(name=friendly_name, parent=root)
+            else:
+                child = Node(name=friendly_name, parent=child)
+        
+        for pre, _, node in RenderTree(node=root, style=AsciiStyle()):
+            print("%s%s" % (pre, node.name))
+
 
 
