@@ -272,7 +272,7 @@ class PurviewCollectionsClient(AtlasBaseClient):
         skipToken: str = None
     ):
 
-        """list collectons and a couple things
+        """list collectons and a couple things to it.
         """
 
         atlas_endpoint = self.endpoint_url + f"collections?api-version={api_version}"
