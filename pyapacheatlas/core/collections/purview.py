@@ -444,18 +444,22 @@ class PurviewCollectionsClient(AtlasBaseClient):
 
             collection_updated_list = list(collection_dict.items())
 
-            really_final_list = []
+            final_collection_updated_list = []
             for index, value in enumerate(collection_updated_list):
                 if value[1]["parentCollection"] is None:
                     new_key = [value[0], value[1]["friendlyName"], collection_updated_list[index - 1][0]]
-                    really_final_list.append(new_key)
+                    final_collection_updated_list.append(new_key)
                 else:
-                    really_final_list.append([value[0], value[1]["friendlyName"], value[1]["parentCollection"]])
+                    final_collection_updated_list.append([value[0], value[1]["friendlyName"], value[1]["parentCollection"]])
             
-            for item in really_final_list:
-                atlas_endpoint = self.endpoint_url + f"account/collections/{item[0]}?api-version={api_version}"
+            for item in final_collection_updated_list:
+                collection_name = item[0]
+                friendly_name = item[1]
+                parent_collection = item[2]
+
+                atlas_endpoint = self.endpoint_url + f"account/collections/{collection_name}?api-version={api_version}"
                 headers=self.authentication.get_authentication_headers()
-                data = f'{{"parentCollection": {{"referenceName": "{item[2]}"}}, "friendlyName": "{item[1]}"}}'
+                data = f'{{"parentCollection": {{"referenceName": "{parent_collection}"}}, "friendlyName": "{friendly_name}"}}'
                 request = requests.put(url=atlas_endpoint, headers=headers, data=data)
                 print(request.content, '\n')
 
